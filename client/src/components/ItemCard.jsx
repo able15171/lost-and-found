@@ -8,7 +8,8 @@ function timeAgo(ts) {
 }
 
 export default function ItemCard({ item, user, onResolve, onDelete }) {
-  const canManage = item.userId === user.id || user.role === 'admin'
+  const isOwner = item.userId === user.id
+  const isAdmin = user.role === 'admin'
   return (
     <article className={'card' + (item.status === 'resolved' ? ' done' : '')}>
       <div className="photo">
@@ -23,11 +24,13 @@ export default function ItemCard({ item, user, onResolve, onDelete }) {
         {item.description && <p>{item.description}</p>}
         <span className="meta">Posted by {item.posterName}</span>
         {item.status === 'resolved' && <span className="meta"><b>Returned to owner</b></span>}
-        {canManage && (
+        {(isOwner || isAdmin) && (
           <div className="actions">
-            {item.status === 'open' &&
+            {isOwner && item.status === 'open' &&
               <button className="btn ghost small" onClick={onResolve}>Mark returned</button>}
-            <button className="btn danger small" onClick={onDelete}>Delete</button>
+            <button className="btn danger small" onClick={onDelete}>
+              {isAdmin && !isOwner ? 'Remove (admin)' : 'Delete'}
+            </button>
           </div>
         )}
       </div>

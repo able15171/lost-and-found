@@ -9,7 +9,13 @@ export default function Board({ user, onLogout }) {
   const [query, setQuery] = useState('')
   const [posting, setPosting] = useState(false)
 
-  const load = async () => setItems(await api.listItems())
+  const load = async () => {
+    try {
+      setItems(await api.listItems())
+    } catch (e) {
+      alert(e.message)
+    }
+  }
   useEffect(() => { load() }, [])
 
   const shown = items.filter((i) =>
@@ -23,7 +29,7 @@ export default function Board({ user, onLogout }) {
       <header className="top">
         <h1>Campus Lost &amp; Found</h1>
         <div className="who">
-          <span>{user.fullName}</span>
+          <span>{user.fullName}{user.role === 'admin' ? ' (Admin)' : ''}</span>
           <button className="btn ghost small" onClick={onLogout}>Log out</button>
         </div>
       </header>
@@ -48,8 +54,13 @@ export default function Board({ user, onLogout }) {
           )}
           {shown.map((item) => (
             <ItemCard key={item.id} item={item} user={user}
-              onResolve={async () => { await api.resolveItem(item.id); load() }}
-              onDelete={async () => { await api.deleteItem(item.id); load() }} />
+              onResolve={async () => {
+                try { await api.resolveItem(item.id); load() } catch (e) { alert(e.message) }
+              }}
+              onDelete={async () => {
+                if (!confirm('Delete this post?')) return
+                try { await api.deleteItem(item.id); load() } catch (e) { alert(e.message) }
+              }} />
           ))}
         </div>
       </main>

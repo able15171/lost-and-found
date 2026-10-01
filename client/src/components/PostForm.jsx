@@ -21,8 +21,13 @@ export default function PostForm({ user, onClose, onPosted }) {
 
   async function submit(e) {
     e.preventDefault()
-    await api.createItem(user, { ...form, imageFile: file })
-    onPosted()
+    setError('')
+    try {
+      await api.createItem(user, { ...form, imageFile: file })
+      onPosted()
+    } catch (err) {
+      setError(err.message)
+    }
   }
 
   return (
